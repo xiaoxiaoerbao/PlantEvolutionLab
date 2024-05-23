@@ -36,7 +36,7 @@ public class IOTool {
         if (file.getAbsolutePath().endsWith(".gz")) {
             return getBufferedReaderFromGZFile(file.getAbsolutePath());
         }else {
-            return getBufferedReaderFromFile(file.getName());
+            return getBufferedReaderFromFile(file.getAbsolutePath());
         }
     }
 

@@ -119,6 +119,58 @@ public class GenomeSequence {
         }
     }
 
+    public GenomeSequence(File fnaFile){
+        List<String> scaffoldNameList = new ArrayList<>();
+        try (BufferedReader br = IOTool.getBufferedReader(fnaFile)) {
+            String line;
+            int currentScaffoldIndex = 0;
+            int nextScaffoldIndex = -1;
+            byte[] byteLine;
+            List<byte[]> scaffoldByteList = new ArrayList<>();
+            List<byte[]> scaffoldList = new ArrayList<>();
+            int scaffoldByteSize=0;
+            int cumLineSize;
+            byte[] scaffoldByte;
+            while ((line=br.readLine()) != null) {
+                if (line.startsWith(">")){
+                    scaffoldNameList.add(line.substring(1));
+                    nextScaffoldIndex++;
+                    continue;
+                }
+                if (nextScaffoldIndex == currentScaffoldIndex){
+                    byteLine = this.encoding(line.toCharArray());
+                    scaffoldByteList.add(byteLine);
+                    scaffoldByteSize+=byteLine.length;
+                }else {
+                    System.out.println(currentScaffoldIndex);
+                    cumLineSize=0;
+                    scaffoldByte = new byte[scaffoldByteSize];
+                    for (byte[] bytes : scaffoldByteList) {
+                        System.arraycopy(bytes, 0, scaffoldByte, cumLineSize, bytes.length);
+                        cumLineSize += bytes.length;
+                    }
+                    scaffoldList.add(scaffoldByte);
+                    scaffoldByteList.clear();
+                    scaffoldByteSize = 0;
+                    byteLine = this.encoding(line.toCharArray());
+                    scaffoldByteList.add(byteLine);
+                    scaffoldByteSize+=byteLine.length;
+                    currentScaffoldIndex = nextScaffoldIndex;
+                }
+            }
+            cumLineSize=0;
+            scaffoldByte = new byte[scaffoldByteSize];
+            for (byte[] bytes : scaffoldByteList) {
+                System.arraycopy(bytes, 0, scaffoldByte, cumLineSize, bytes.length);
+                cumLineSize += bytes.length;
+            }
+            scaffoldList.add(scaffoldByte);
+            System.out.println();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
     private byte[] processBlock(String scaffoldCharacters){
         return this.encoding(scaffoldCharacters.toCharArray());
     }
@@ -172,7 +224,7 @@ public class GenomeSequence {
     public static void main(String[] args) {
         String file = "/Users/xudaxing/Data/wheatReference/ref/CS1_v2.1_genomic.fna.gz";
         long startTime = System.currentTimeMillis();
-        GenomeSequence genomeSequence = new GenomeSequence(file);
+        GenomeSequence genomeSequence = new GenomeSequence(new File(file));
         long endTime = System.currentTimeMillis();
         System.out.println((endTime-startTime)/(1000*1000) + "s");
         char[][] chars = genomeSequence.getAtcgnChar(file);
