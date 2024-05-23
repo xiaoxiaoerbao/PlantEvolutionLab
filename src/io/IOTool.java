@@ -1,4 +1,4 @@
-package IOTool;
+package io;
 
 import java.io.*;
 import java.util.zip.GZIPInputStream;

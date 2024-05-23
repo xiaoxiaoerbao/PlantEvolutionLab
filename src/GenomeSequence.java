@@ -1,4 +1,4 @@
-import IOTool.IOTool;
+import io.IOTool;
 import it.unimi.dsi.fastutil.bytes.Byte2CharMap;
 import it.unimi.dsi.fastutil.bytes.Byte2CharOpenHashMap;
 import it.unimi.dsi.fastutil.chars.Char2ByteMap;
