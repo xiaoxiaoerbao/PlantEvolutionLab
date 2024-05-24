@@ -9,11 +9,11 @@ public class PStringUtils {
      * @return
      */
     public static String getNDigitNumber (int n, int num) {
-        String s = String.valueOf(num);
+        StringBuilder s = new StringBuilder(String.valueOf(num));
         int cnt = n-s.length();
         for (int i = 0; i < cnt; i++) {
-            s = "0"+s;
+            s.insert(0, "0");
         }
-        return s;
+        return s.toString();
     }
 }

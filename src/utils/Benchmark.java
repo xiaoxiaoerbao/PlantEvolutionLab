@@ -15,11 +15,11 @@ public class Benchmark {
     }
 
     public static double getTimeSpanMinutes (long timeStart) {
-        return (double)getTimeSpanSeconds(timeStart)/60;
+        return getTimeSpanSeconds(timeStart) /60;
     }
 
     public static double getTimeSpanHours (long timeStart) {
-        return (double)getTimeSpanMinutes(timeStart)/60;
+        return getTimeSpanMinutes(timeStart) /60;
     }
 
     public static double getUsedMemoryGb () {

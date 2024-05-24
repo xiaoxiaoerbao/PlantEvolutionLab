@@ -120,7 +120,7 @@ public class IOTool {
     public static List<File> getVisibleFileRecursiveDir(String dir){
         File inputDirFile = new File(dir);
         TreeSet<File> fileTree = new TreeSet<>();
-        for (File entry : inputDirFile.listFiles()) {
+        for (File entry : Objects.requireNonNull(inputDirFile.listFiles())) {
             if (entry.isHidden()) continue;
             if (entry.isFile()){
                 fileTree.add(entry);
@@ -141,6 +141,7 @@ public class IOTool {
         File[] files=new File(dir).listFiles();
         Predicate<File> hidden=File::isHidden;
         Predicate<File> file=File::isFile;
+        assert files != null;
         return Arrays.stream(files).filter(hidden.negate().and(file)).sorted().collect(Collectors.toList());
     }
 
@@ -175,7 +176,6 @@ public class IOTool {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        assert lines!=null : " check "+file;
         return lines;
     }
 
