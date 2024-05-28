@@ -110,7 +110,7 @@ public class Fna {
 
     public void gzip(String inputDir){
         List<File> files = IOTool.getVisibleFileRecursiveDir(inputDir);
-        List<String> commandList = new ArrayList<String>();
+        List<String> commandList = new ArrayList<>();
         StringBuilder sb = new StringBuilder();
         for (File file : files) {
             sb.setLength(0);
