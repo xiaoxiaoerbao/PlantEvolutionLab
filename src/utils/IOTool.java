@@ -137,7 +137,7 @@ public class IOTool {
     /**
      * 获取当前目录下的所有非隐藏文件(不包含目录)，不递归
      * @param dir dir
-     * @return
+     * @return all visible files in current dir
      */
     public static List<File> getVisibleDir(String dir){
         File[] files=new File(dir).listFiles();
@@ -149,8 +149,8 @@ public class IOTool {
 
     /**
      * 查看文件header
-     * @param file
-     * @param delimiter
+     * @param file file name
+     * @param delimiter \t or others
      */
     public static void viewHeader(String file, String delimiter){
         try (BufferedReader br = IOTool.getBufferedReader(file)) {
