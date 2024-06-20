@@ -15,17 +15,18 @@ import java.util.regex.Pattern;
 public class Fna {
     String refDir = "/Users/xudaxing/Data/wheatReference/ref";
     String referenceDir = "/Volumes/T7/006_analysis/001_wheatReference";
-    String reference1A1B1DDir = "/Volumes/T7/006_analysis/002_wheatReference1A1B1D";
+    String reference1A1B1DDir = "/home/ubuntu/Documents/001_analysis/002_wheatReferenceGroup1";
     String logDir = "/Volumes/T7/006_analysis/log";
     int threadsNum = 10;
 
     public Fna(){
-        this.filterRename(refDir, referenceDir);
-        this.retain(referenceDir, reference1A1B1DDir, "1A");
-        this.retain(referenceDir, reference1A1B1DDir, "1B");
-        this.retain(referenceDir, reference1A1B1DDir, "1D");
-        this.gzip(reference1A1B1DDir);
-        this.gzip(referenceDir);
+//        this.filterRename(refDir, referenceDir);
+//        this.retain(referenceDir, reference1A1B1DDir, "1A");
+//        this.retain(referenceDir, reference1A1B1DDir, "1B");
+//        this.retain(referenceDir, reference1A1B1DDir, "1D");
+//        this.gzip(reference1A1B1DDir);
+//        this.gzip(referenceDir);
+        this.renameHeader(reference1A1B1DDir, "/home/ubuntu/Documents/001_analysis/temp");
     }
 
     public void filterRename(File file, File outFile){
@@ -120,8 +121,46 @@ public class Fna {
         CommandUtils.runSH_multipleCommands("gz", commandList, inputDir, logDir, threadsNum);
     }
 
+    public void renameHeader(String inputDir, String outDir){
+        List<File> files = IOTool.getFileListInDirEndWith(inputDir, ".fna.gz");
+        String[] outFileNames = files.stream().map(File::getName).map(s -> s.replaceAll("\\.gz", "")).toArray(String[]::new);
+        for (int i = 0; i < files.size(); i++) {
+            this.renameHeader(files.get(i), new File(outDir, outFileNames[i]));
+        }
+    }
+
+    private void renameHeader(File file, File outFile){
+        try (BufferedWriter bw = IOTool.getBufferedWriter(outFile);
+             BufferedReader br = IOTool.getBufferedReader(file)) {
+            String line;
+            StringBuilder sb = new StringBuilder();
+            int headLength;
+            char[] chars;
+            while ((line=br.readLine())!=null){
+                if (line.startsWith(">")){
+                    headLength = line.length();
+                    chars = line.toCharArray();
+                    sb.setLength(0);
+                    sb.append(chars[0]).append(chars[headLength-2]).append(chars[headLength-1]);
+                    bw.write(sb.toString());
+                    bw.newLine();
+                }else {
+                    bw.write(line);
+                    bw.newLine();
+                }
+            }
+            bw.flush();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+
+
     public static void main(String[] args) {
         Fna fna  = new Fna();
+//        System.out.println("ok");
+
     }
 
 
