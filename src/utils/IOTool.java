@@ -81,6 +81,7 @@ public class IOTool {
     public static File[] listFilesStartsWith (File[] fAll, String startStr) {
         List<File> al = new ArrayList<>();
         for (File file : fAll) {
+            if (file.isHidden()) continue;
             if (file.getName().startsWith(startStr)) al.add(file);
         }
         return al.toArray(new File[0]);
@@ -89,6 +90,7 @@ public class IOTool {
     public static File[] listFilesEndWith (File[] fAll, String endStr) {
         List<File> al = new ArrayList<>();
         for (File file : fAll) {
+            if (file.isHidden()) continue;
             if (file.getName().endsWith(endStr)) al.add(file);
         }
         return al.toArray(new File[0]);
