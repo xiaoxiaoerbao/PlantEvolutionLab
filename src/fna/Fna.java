@@ -26,7 +26,7 @@ public class Fna {
 //        this.retain(referenceDir, reference1A1B1DDir, "1D");
 //        this.gzip(reference1A1B1DDir);
 //        this.gzip(referenceDir);
-        this.renameHeader(reference1A1B1DDir, "/home/ubuntu/Documents/001_analysis/temp");
+        this.renameHeader(reference1A1B1DDir, reference1A1B1DDir);
     }
 
     public void filterRename(File file, File outFile){
