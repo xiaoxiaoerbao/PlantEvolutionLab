@@ -7,6 +7,7 @@ public class Benchmark {
 
     /**
      * Calculates the time span (in nanoseconds) from a given start time.
+     *
      * @param startTime The start time (in nanoseconds) captured using System.nanoTime().
      * @return The time span in nanoseconds.
      */
@@ -16,6 +17,7 @@ public class Benchmark {
 
     /**
      * Calculates the time span in milliseconds from a given start time.
+     *
      * @param startTime The start time (in nanoseconds) captured using System.nanoTime().
      * @return The time span in milliseconds.
      */
