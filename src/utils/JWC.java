@@ -10,7 +10,7 @@ import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.Map;
 
-public class jwc {
+public class JWC {
     public static void temp1(String inputFile, Map<String, String> map, String outputFile) {
         int count = 0;
         try (BufferedReader br = IOTool.getBufferedReaderFromChineseFile(inputFile);
