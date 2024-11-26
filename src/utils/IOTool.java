@@ -8,8 +8,18 @@ import java.util.stream.Collectors;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
+/**
+ * A utility class for file input/output operations, including handling compressed files (GZIP),
+ * reading and writing lines, and filtering files based on certain conditions.
+ */
 public class IOTool {
 
+    /**
+     * Returns a BufferedReader for reading a file.
+     *
+     * @param fileName The name of the file.
+     * @return A BufferedReader to read the file.
+     */
     public static BufferedReader getBufferedReaderFromFile(String fileName) {
         try {
             return new BufferedReader(new FileReader(fileName));
@@ -18,6 +28,12 @@ public class IOTool {
         }
     }
 
+    /**
+     * Returns a BufferedReader for reading a GZipped file.
+     *
+     * @param file The path to the gzipped file.
+     * @return A BufferedReader to read the gzipped file.
+     */
     public static BufferedReader getBufferedReaderFromGZFile(String file) {
         try {
             FileInputStream fileInputStream = new FileInputStream(file);
@@ -28,6 +44,12 @@ public class IOTool {
         }
     }
 
+    /**
+     * Returns a BufferedReader for reading a file with Chinese encoding (GB18030).
+     *
+     * @param file The path to the file.
+     * @return A BufferedReader to read the file with GB18030 encoding.
+     */
     public static BufferedReader getBufferedReaderFromChineseFile(String file) {
         try {
             InputStreamReader inputStreamReader = new InputStreamReader(new FileInputStream(file), "GB18030");
@@ -37,6 +59,12 @@ public class IOTool {
         }
     }
 
+    /**
+     * Returns a BufferedReader based on file extension, handling gzipped and normal files.
+     *
+     * @param file The path to the file.
+     * @return A BufferedReader to read the file, handling gzipped files.
+     */
     public static BufferedReader getBufferedReader(String file) {
         if (file.endsWith(".gz")) {
             return getBufferedReaderFromGZFile(file);
@@ -45,6 +73,12 @@ public class IOTool {
         }
     }
 
+    /**
+     * Returns a BufferedReader for reading a file based on the File object (handling gzipped files).
+     *
+     * @param file The File object representing the file.
+     * @return A BufferedReader to read the file.
+     */
     public static BufferedReader getBufferedReader(File file) {
         if (file.getAbsolutePath().endsWith(".gz")) {
             return getBufferedReaderFromGZFile(file.getAbsolutePath());
@@ -53,6 +87,12 @@ public class IOTool {
         }
     }
 
+    /**
+     * Returns a BufferedWriter for writing to a regular file.
+     *
+     * @param file The file to write to.
+     * @return A BufferedWriter to write to the file.
+     */
     public static BufferedWriter getBufferedWriterForFile(String file) {
         try {
             return new BufferedWriter(new FileWriter(file));
@@ -61,6 +101,12 @@ public class IOTool {
         }
     }
 
+    /**
+     * Returns a BufferedWriter for writing to a gzipped file.
+     *
+     * @param file The gzipped file to write to.
+     * @return A BufferedWriter to write to the gzipped file.
+     */
     public static BufferedWriter getBufferedWriterForGZFile(String file) {
         try {
             FileOutputStream fileOutputStream = new FileOutputStream(file);
@@ -71,6 +117,12 @@ public class IOTool {
         }
     }
 
+    /**
+     * Returns a BufferedWriter based on file extension, handling gzipped and normal files.
+     *
+     * @param file The file path.
+     * @return A BufferedWriter to write to the file.
+     */
     public static BufferedWriter getBufferedWriter(String file) {
         if (file.endsWith(".gz")) {
             return getBufferedWriterForGZFile(file);
@@ -79,6 +131,12 @@ public class IOTool {
         }
     }
 
+    /**
+     * Returns a BufferedWriter for a file based on the File object (handling gzipped files).
+     *
+     * @param file The File object representing the file.
+     * @return A BufferedWriter to write to the file.
+     */
     public static BufferedWriter getBufferedWriter(File file) {
         if (file.getAbsolutePath().endsWith(".gz")) {
             return getBufferedWriterForGZFile(file.getAbsolutePath());
@@ -87,7 +145,14 @@ public class IOTool {
         }
     }
 
-    public static File[] listFilesStartsWith (File[] fAll, String startStr) {
+    /**
+     * Filters and returns files that start with a given prefix.
+     *
+     * @param fAll An array of files to filter.
+     * @param startStr The prefix to filter by.
+     * @return An array of files that start with the given prefix.
+     */
+    private static File[] listFilesStartsWith (File[] fAll, String startStr) {
         List<File> al = new ArrayList<>();
         for (File file : fAll) {
             if (file.isHidden()) continue;
@@ -96,7 +161,14 @@ public class IOTool {
         return al.toArray(new File[0]);
     }
 
-    public static File[] listFilesEndWith (File[] fAll, String endStr) {
+    /**
+     * Filters and returns files that end with a given suffix.
+     *
+     * @param fAll An array of files to filter.
+     * @param endStr The suffix to filter by.
+     * @return An array of files that end with the given suffix.
+     */
+    private static File[] listFilesEndWith (File[] fAll, String endStr) {
         List<File> al = new ArrayList<>();
         for (File file : fAll) {
             if (file.isHidden()) continue;
@@ -105,6 +177,13 @@ public class IOTool {
         return al.toArray(new File[0]);
     }
 
+    /**
+     * Returns a sorted list of files in the given directory that start with a given prefix.
+     *
+     * @param inDirS The directory to search.
+     * @param startStr The prefix to filter by.
+     * @return A sorted list of files in the directory that start with the given prefix.
+     */
     public static List<File> getFileListInDirStartsWith (String inDirS, String startStr) {
         File[] fs = new File(inDirS).listFiles();
         assert fs != null;
@@ -114,6 +193,13 @@ public class IOTool {
         return fList;
     }
 
+    /**
+     * Returns a sorted list of files in the given directory that end with a given suffix.
+     *
+     * @param inDirS The directory to search.
+     * @param endStr The suffix to filter by.
+     * @return A sorted list of files in the directory that end with the given suffix.
+     */
     public static List<File> getFileListInDirEndWith (String inDirS, String endStr) {
         File[] fs = new File(inDirS).listFiles();
         assert fs != null;
@@ -124,9 +210,10 @@ public class IOTool {
     }
 
     /**
-     * 递归获取当前目录下的所有非隐藏文件和非隐藏目录
-     * @param dir dir
-     * @return 当前目录下的所有非隐藏文件和非隐藏目录
+     * Recursively retrieves all visible (non-hidden) files and directories in the given directory.
+     *
+     * @param dir The directory to search.
+     * @return A sorted list of visible files and directories.
      */
     public static List<File> getVisibleFileRecursiveDir(String dir){
         File inputDirFile = new File(dir);
@@ -144,9 +231,10 @@ public class IOTool {
     }
 
     /**
-     * 获取当前目录下的所有非隐藏文件(不包含目录)，不递归
-     * @param dir dir
-     * @return all visible files in current dir
+     * Retrieves all visible (non-hidden) files (excluding directories) in the given directory.
+     *
+     * @param dir The directory to search.
+     * @return A sorted list of visible files in the directory.
      */
     public static List<File> getVisibleDir(String dir){
         File[] files=new File(dir).listFiles();
@@ -157,9 +245,10 @@ public class IOTool {
     }
 
     /**
-     * 查看文件header
-     * @param file file name
-     * @param delimiter \t or others
+     * Views the header of a file, printing its columns.
+     *
+     * @param file The file to view.
+     * @param delimiter The delimiter used to separate columns.
      */
     public static void viewHeader(String file, String delimiter){
         try (BufferedReader br = IOTool.getBufferedReader(file)) {
@@ -173,10 +262,22 @@ public class IOTool {
         }
     }
 
+    /**
+     * Reads the header from a file and prints its columns.
+     * The default delimiter is tab ("\t").
+     *
+     * @param file The file to read the header from.
+     */
     public static void viewHeader(String file){
         viewHeader(file,"\t");
     }
 
+    /**
+     * Reads all lines from a file into a list.
+     *
+     * @param file The file to read.
+     * @return A list of strings representing all the lines in the file.
+     */
     public static List<String> readAllLines(String file){
         List<String> lines=new ArrayList<>();
         String line;
@@ -190,6 +291,12 @@ public class IOTool {
         return lines;
     }
 
+    /**
+     * Writes all lines to a file. Each line is written with a new line separator.
+     *
+     * @param outFile The file to write to.
+     * @param lines A list of strings to be written to the file.
+     */
     public static void writeAllLines(File outFile, List<String> lines){
         try (BufferedWriter bw = IOTool.getBufferedWriter(outFile)) {
             for (String line:lines){
@@ -202,6 +309,14 @@ public class IOTool {
         }
     }
 
+    /**
+     * Generates a list of log files with the specified title and log file count. The log files are named using the title and a digit suffix.
+     *
+     * @param title The title to be used in the log file names.
+     * @param logDir The directory where the log files are stored.
+     * @param logFileNum The number of log files to generate.
+     * @return A list of File objects representing the log files.
+     */
     public static List<File> getLogFile(String title, String logDir, int logFileNum){
         assert logFileNum > 0 : logFileNum + " must be greater than 0";
         int digitsNum=(int)(Math.log10(logFileNum) +1);
