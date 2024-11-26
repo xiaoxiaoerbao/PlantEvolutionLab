@@ -173,12 +173,12 @@ public class CommandUtils {
             }
         }
         if (failCommandList.size()==0){
-            System.out.println(shFile+" all commands had completed in "+ Benchmark.getTimeSpanHours(start)+ " hours");
+            System.out.println(shFile+" all commands had completed in "+ Benchmark.calculateTimeSpanHours(start)+ " hours");
         }else {
             IOTool.writeAllLines(new File(logDir, title+".failedRunCommands.sh"), failCommandList);
             System.out.println(shFile+" had "+ failCommandList.size()+ "commands run failed");
             System.out.println("Commands run failed had been written to "+logDir);
-            System.out.println(shFile+" total spend "+Benchmark.getTimeSpanHours(start)+ " hours");
+            System.out.println(shFile+" total spend "+Benchmark.calculateTimeSpanHours(start)+ " hours");
         }
     }
 
@@ -219,12 +219,12 @@ public class CommandUtils {
             }
         }
         if (failCommandList.size()==0){
-            System.out.println(" all commands had completed in "+ Benchmark.getTimeSpanHours(start)+ " hours");
+            System.out.println(" all commands had completed in "+ Benchmark.calculateTimeSpanHours(start)+ " hours");
         }else {
             IOTool.writeAllLines(new File(logDir, title+".failedRunCommands.sh"), failCommandList);
             System.out.println(failCommandList.size()+ "commands run failed");
             System.out.println("Commands run failed had been written to "+logDir);
-            System.out.println(" total spend "+Benchmark.getTimeSpanHours(start)+ " hours");
+            System.out.println(" total spend "+Benchmark.calculateTimeSpanHours(start)+ " hours");
         }
     }
 
@@ -267,12 +267,12 @@ public class CommandUtils {
             }
         }
         if (failCommandList.size()==0){
-            System.out.println(shFile+" all commands had completed in "+ Benchmark.getTimeSpanHours(start)+ " hours");
+            System.out.println(shFile+" all commands had completed in "+ Benchmark.calculateTimeSpanHours(start)+ " hours");
         }else {
             IOTool.writeAllLines(new File(logDir, title+".failedRunCommands.sh"), failCommandList);
             System.out.println(shFile+" had "+ failCommandList.size()+ "commands run failed");
             System.out.println("Commands run failed had been written to "+logDir);
-            System.out.println(shFile+" total spend "+Benchmark.getTimeSpanHours(start)+ " hours");
+            System.out.println(shFile+" total spend "+Benchmark.calculateTimeSpanHours(start)+ " hours");
         }
     }
 
@@ -313,12 +313,12 @@ public class CommandUtils {
             }
         }
         if (failCommandList.size()==0){
-            System.out.println(" all commands had completed in "+ Benchmark.getTimeSpanHours(start)+ " hours");
+            System.out.println(" all commands had completed in "+ Benchmark.calculateTimeSpanHours(start)+ " hours");
         }else {
             IOTool.writeAllLines(new File(logDir, title+".failedRunCommands.sh"), failCommandList);
             System.out.println(failCommandList.size()+ "commands run failed");
             System.out.println("Commands run failed had been written to "+logDir);
-            System.out.println(" total spend "+Benchmark.getTimeSpanHours(start)+ " hours");
+            System.out.println(" total spend "+Benchmark.calculateTimeSpanHours(start)+ " hours");
         }
     }
 
