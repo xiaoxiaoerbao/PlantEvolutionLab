@@ -28,6 +28,15 @@ public class IOTool {
         }
     }
 
+    public static BufferedReader getBufferedReaderFromChineseFile(String file) {
+        try {
+            InputStreamReader inputStreamReader = new InputStreamReader(new FileInputStream(file), "GB18030");
+            return new BufferedReader(inputStreamReader);
+        } catch (FileNotFoundException | UnsupportedEncodingException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
     public static BufferedReader getBufferedReader(String file) {
         if (file.endsWith(".gz")) {
             return getBufferedReaderFromGZFile(file);
