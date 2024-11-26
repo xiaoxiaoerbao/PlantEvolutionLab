@@ -19,11 +19,9 @@ public class PStringUtils {
 
     /**
      * Formats a string into multiple lines, each containing a specified maximum number of characters.
-     *
      * This method takes an input string and breaks it into multiple lines, inserting a newline character ('\n') after every
      * {@code maxCharactersPerLine} characters. This is useful for formatting long strings into manageable chunks, such as in
      * display purposes or file output.
-     *
      * @param inputString The string to be formatted into multiple lines.
      * @param maxCharactersPerLine The maximum number of characters allowed in each line.
      * @return A string where the original string is split into multiple lines, each containing up to {@code maxCharactersPerLine} characters.
