@@ -23,8 +23,6 @@ public class ProteinSimilarityMatrix implements SimilarityMatrix {
         return indexMap;
     }
 
-    private static final int[][] defau
-
     public ProteinSimilarityMatrix(int[][] similarityMatrix) {
         assert similarityMatrix.length == similarityMatrix[0].length : "check your similarityMatrix, it must be a square matrix";
         assert similarityMatrix.length == 20 : "protein similarityMatrix length must be 20";
