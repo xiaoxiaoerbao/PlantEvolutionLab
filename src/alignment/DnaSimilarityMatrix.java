@@ -1,12 +1,31 @@
 package alignment;
 
-public class DnaSimilarityMatrix {
+import it.unimi.dsi.fastutil.bytes.Byte2IntMap;
+import it.unimi.dsi.fastutil.bytes.Byte2IntOpenHashMap;
+
+public class DnaSimilarityMatrix implements SimilarityMatrix {
 
     /**
      * 4 * 4
-     * sort by Base enum
+     * sort by base ascii
      */
     int[][] similarityMatrix;
+
+    private static final Byte2IntMap BASE_ASCII_TO_INDEX_MAP = baseAsciiToIndexMap();
+
+    private static Byte2IntMap baseAsciiToIndexMap(){
+        byte[] bases = {'A', 'C', 'G', 'T'};
+        Byte2IntMap indexMap = new Byte2IntOpenHashMap();
+        for(int i = 0; i < bases.length; i++){
+            indexMap.put(bases[i], i);
+        }
+        return indexMap;
+    }
+
+    /**
+     * default matrix, 1 for match, -1 for mismatch
+     */
+    private static final int[][] defaultMatrix = {{1,-1,-1,-1},{-1,1,-1,-1},{-1,-1,1,-1},{-1,-1,-1,1}};
 
     public DnaSimilarityMatrix(int[][] matrix) {
         assert matrix.length == matrix[0].length : "check your similarityMatrix, it must be a square matrix";
@@ -14,13 +33,8 @@ public class DnaSimilarityMatrix {
         this.similarityMatrix = matrix;
     }
 
-    public int[][] getSimilarityMatrix() {
-        return similarityMatrix;
-    }
-
+    @Override
     public int getSimilarityValueBetween(byte baseAscii1, byte baseAscii2) {
-        Base base1 = Base.fromAscii(baseAscii1);
-        Base base2 = Base.fromAscii(baseAscii2);
-        return similarityMatrix[base1.ordinal()][base2.ordinal()];
+        return similarityMatrix[BASE_ASCII_TO_INDEX_MAP.get(baseAscii1)][BASE_ASCII_TO_INDEX_MAP.get(baseAscii2)];
     }
 }

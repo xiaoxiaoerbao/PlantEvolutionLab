@@ -10,8 +10,7 @@ public class Alignment {
     // Define a unique byte value to represent insertions and deletions.
     // Here, we choose a value that is unlikely to appear in normal data.
     // It can be adjusted according to the actual situation.
-    private static final byte GAP_REPRESENTATION = (byte) '\u0000';
-
+    private static final byte GAP_REPRESENTATION = 45; // ASCII code for '-'
 
     /**
      *
@@ -91,10 +90,11 @@ public class Alignment {
                 j--;
             }
         }
-
         Collections.reverse(alignment1);
         Collections.reverse(alignment2);
-
+//        for (int k = 0; k < alignment1.size(); k++) {
+//            System.out.println((char)alignment1.getByte(k)+ " " + (char)alignment2.getByte(k));
+//        }
         return Pair.of(alignment1, alignment2);
     }
 }
