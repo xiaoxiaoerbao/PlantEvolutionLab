@@ -31,9 +31,9 @@ public class ProteinSimilarityMatrix implements SimilarityMatrix {
 
     @Override
     public int getSimilarityValueBetween(byte aminoAcidAscii1, byte aminoAcidAscii2) {
-        AminoAcid aminoAcid1 = AminoAcid.fromAscii(aminoAcidAscii1);
-        AminoAcid aminoAcid2 = AminoAcid.fromAscii(aminoAcidAscii2);
-        return similarityMatrix[aminoAcid1.ordinal()][aminoAcid2.ordinal()];
+        int index1 = ProteinSimilarityMatrix.AMINO_ACID_ASCII_TO_INDEX_MAP.get(aminoAcidAscii1);
+        int index2 = ProteinSimilarityMatrix.AMINO_ACID_ASCII_TO_INDEX_MAP.get(aminoAcidAscii2);
+        return similarityMatrix[index1][index2];
     }
 
 }

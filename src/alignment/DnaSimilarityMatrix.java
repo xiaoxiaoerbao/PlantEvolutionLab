@@ -35,6 +35,8 @@ public class DnaSimilarityMatrix implements SimilarityMatrix {
 
     @Override
     public int getSimilarityValueBetween(byte baseAscii1, byte baseAscii2) {
-        return similarityMatrix[BASE_ASCII_TO_INDEX_MAP.get(baseAscii1)][BASE_ASCII_TO_INDEX_MAP.get(baseAscii2)];
+        int index1 = DnaSimilarityMatrix.BASE_ASCII_TO_INDEX_MAP.get(baseAscii1);
+        int index2 = DnaSimilarityMatrix.BASE_ASCII_TO_INDEX_MAP.get(baseAscii2);
+        return similarityMatrix[index1][index2];
     }
 }
