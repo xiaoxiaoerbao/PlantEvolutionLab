@@ -1,9 +1,6 @@
 package alignment;
 
 
-import it.unimi.dsi.fastutil.bytes.Byte2IntMap;
-import it.unimi.dsi.fastutil.bytes.Byte2IntOpenHashMap;
-
 public class ProteinSimilarityMatrix implements SimilarityMatrix {
 
     /**
@@ -45,25 +42,6 @@ public class ProteinSimilarityMatrix implements SimilarityMatrix {
         return null;
     }
 
-    /**
-     * AminoAcid ascii to index map
-     * Order by AminoAcid
-     */
-    private static final Byte2IntMap AMINO_ACID_ASCII_TO_INDEX_MAP = aminoAcidAsciiToIndexMap();
-
-    /**
-     * Initialize the amino acid ascii to index map
-     * @return amino acid ascii to index map
-     */
-    private static Byte2IntMap aminoAcidAsciiToIndexMap() {
-        AminoAcid[] aminoAcids = AminoAcid.values();
-        Byte2IntMap indexMap = new Byte2IntOpenHashMap();
-        for (int i = 0; i < aminoAcids.length; i++) {
-            indexMap.put(aminoAcids[i].getAscii(), i);
-        }
-        return indexMap;
-    }
-
     public ProteinSimilarityMatrix(int[][] similarityMatrix) {
         assert similarityMatrix.length == similarityMatrix[0].length : "check your similarityMatrix, it must be a square matrix";
         assert similarityMatrix.length == 20 : "protein similarityMatrix length must be 20";
@@ -72,8 +50,8 @@ public class ProteinSimilarityMatrix implements SimilarityMatrix {
 
     @Override
     public int getSimilarityValueBetween(byte aminoAcidAscii1, byte aminoAcidAscii2) {
-        int index1 = ProteinSimilarityMatrix.AMINO_ACID_ASCII_TO_INDEX_MAP.get(aminoAcidAscii1);
-        int index2 = ProteinSimilarityMatrix.AMINO_ACID_ASCII_TO_INDEX_MAP.get(aminoAcidAscii2);
+        int index1 = AminoAcid.AMINO_ACID_ASCII_TO_INDEX_MAP.get(aminoAcidAscii1);
+        int index2 = AminoAcid.AMINO_ACID_ASCII_TO_INDEX_MAP.get(aminoAcidAscii2);
         return similarityMatrix[index1][index2];
     }
 

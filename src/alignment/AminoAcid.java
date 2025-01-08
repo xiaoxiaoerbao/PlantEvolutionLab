@@ -1,5 +1,8 @@
 package alignment;
 
+import it.unimi.dsi.fastutil.bytes.Byte2IntMap;
+import it.unimi.dsi.fastutil.bytes.Byte2IntOpenHashMap;
+
 /**
  * Amino acid enumeration class
  * Order by A,R,N,D,C,Q,E,G,H,I,L,K,M,F,P,S,T,W,Y,V
@@ -47,6 +50,25 @@ public enum AminoAcid {
 
     public byte getAscii() {
         return ascii;
+    }
+
+    /**
+     * AminoAcid ascii to index map
+     * Order by AminoAcid
+     */
+    public static final Byte2IntMap AMINO_ACID_ASCII_TO_INDEX_MAP = aminoAcidAsciiToIndexMap();
+
+    /**
+     * Initialize the amino acid ascii to index map
+     * @return amino acid ascii to index map
+     */
+    private static Byte2IntMap aminoAcidAsciiToIndexMap() {
+        AminoAcid[] aminoAcids = AminoAcid.values();
+        Byte2IntMap indexMap = new Byte2IntOpenHashMap();
+        for (int i = 0; i < aminoAcids.length; i++) {
+            indexMap.put(aminoAcids[i].getAscii(), i);
+        }
+        return indexMap;
     }
 
     public static AminoAcid fromAscii(byte ascii) {
