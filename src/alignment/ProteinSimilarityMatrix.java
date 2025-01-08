@@ -8,13 +8,13 @@ public class ProteinSimilarityMatrix implements SimilarityMatrix {
 
     /**
      * 20 * 20
-     * sort by AminoAcid ascii
+     * sort by AminoAcid
      */
     int[][] similarityMatrix;
 
     /**
      * 20 * 20
-     * order by A,R,N,D,C,Q,E,G,H,I,L,K,M,F,P,S,T,W,Y,V
+     * order by AminoAcid
      */
     public static final int[][] POINT_ACCEPTED_MUTATION_MATRIX = {
             {30, 109, 154, 33, 93, 266, 579, 21, 66, 95, 57, 29, 20, 345, 772, 590, 0, 20, 365},
@@ -38,13 +38,28 @@ public class ProteinSimilarityMatrix implements SimilarityMatrix {
             {20,3,36,0,30,0,10,0,40,13,23,10,0,260,0,22,23,6,0,17},
             {365,20,13,17,33,27,37,97,30,661,303,17,77,10,50,43,186,0,17,0}};
 
+    public static final int[] RELATIVE_MUTABILITIES = {134, 120, 106,102,100,97,96,94,93,74,66,65,56,56,49,41,41,40,
+            20,18};
+
+    private double[] BACKGROUND_FREQUENCIES(){
+        return null;
+    }
+
+    /**
+     * AminoAcid ascii to index map
+     * Order by AminoAcid
+     */
     private static final Byte2IntMap AMINO_ACID_ASCII_TO_INDEX_MAP = aminoAcidAsciiToIndexMap();
 
-    private static Byte2IntMap aminoAcidAsciiToIndexMap(){
-        byte[] aminoAcids = {'A', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'K', 'L', 'M', 'N', 'P', 'Q', 'R', 'S', 'T', 'V', 'W', 'Y'};
+    /**
+     * Initialize the amino acid ascii to index map
+     * @return amino acid ascii to index map
+     */
+    private static Byte2IntMap aminoAcidAsciiToIndexMap() {
+        AminoAcid[] aminoAcids = AminoAcid.values();
         Byte2IntMap indexMap = new Byte2IntOpenHashMap();
-        for(int i = 0; i < aminoAcids.length; i++){
-            indexMap.put(aminoAcids[i], i);
+        for (int i = 0; i < aminoAcids.length; i++) {
+            indexMap.put(aminoAcids[i].getAscii(), i);
         }
         return indexMap;
     }
