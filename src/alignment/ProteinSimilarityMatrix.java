@@ -1,6 +1,8 @@
 package alignment;
 
 
+import java.util.Collections;
+
 public class ProteinSimilarityMatrix implements SimilarityMatrix {
 
     /**
@@ -12,9 +14,10 @@ public class ProteinSimilarityMatrix implements SimilarityMatrix {
     /**
      * 20 * 20
      * order by AminoAcid
+     * col is original amino acid, row is mutated amino acid
      */
-    public static final int[][] POINT_ACCEPTED_MUTATION_MATRIX = {
-            {30, 109, 154, 33, 93, 266, 579, 21, 66, 95, 57, 29, 20, 345, 772, 590, 0, 20, 365},
+    private static final int[][] POINT_ACCEPTED_MUTATION_MATRIX = {
+            {0, 30, 109, 154, 33, 93, 266, 579, 21, 66, 95, 57, 29, 20, 345, 772, 590, 0, 20, 365},
             {30,0,17,0,10,120,0,10,103,30,17,477,17,7,67,137,20,27,3,20},
             {109,17,0,532,0,50,94,156,226,36,37,322,0,7,27,432,169,3,36,13},
             {154,0,532,0,0,76,831,162,43,13,0,85,0,0,10,98,57,0,0,17},
@@ -35,12 +38,58 @@ public class ProteinSimilarityMatrix implements SimilarityMatrix {
             {20,3,36,0,30,0,10,0,40,13,23,10,0,260,0,22,23,6,0,17},
             {365,20,13,17,33,27,37,97,30,661,303,17,77,10,50,43,186,0,17,0}};
 
-    public static final int[] RELATIVE_MUTABILITIES = {134, 120, 106,102,100,97,96,94,93,74,66,65,56,56,49,41,41,40,
-            20,18};
+    /**
+     * Sorting by AminoAcid
+     */
+    private static final int[] RELATIVE_MUTABILITIES = {100, 65, 134, 106, 20, 93, 102, 49, 66, 96, 40, 56, 94, 41, 56, 120, 97, 18, 41, 74};
 
-    private double[] BACKGROUND_FREQUENCIES(){
-        return null;
+    public static double[][] calculateMutationProbabilityMatrix(){
+        double[][] probabilityMatrix = new double[AminoAcid.values().length][AminoAcid.values().length];
+        // j means the column, i means the row
+        int[] colSum = new int[AminoAcid.values().length];
+        for (int j = 0; j < AminoAcid.values().length; j++) {
+            for (int i = 0; i < AminoAcid.values().length; i++) {
+                colSum[j]=colSum[j]+POINT_ACCEPTED_MUTATION_MATRIX[i][j];
+            }
+        }
+
+        double[] background_frequencies = new double[AminoAcid.values().length];
+        for (int i = 0; i < AminoAcid.values().length; i++) {
+            background_frequencies[i] = (colSum[i])/RELATIVE_MUTABILITIES[i];
+        }
+        double sumBackgroundFrequency = 0;
+        for (int i = 0; i < AminoAcid.values().length; i++) {
+            sumBackgroundFrequency = sumBackgroundFrequency + background_frequencies[i];
+        }
+        double[] normalizedProbabilityMatrix = new double[AminoAcid.values().length];
+        for (int i = 0; i < AminoAcid.values().length; i++) {
+            normalizedProbabilityMatrix[i] = background_frequencies[i]/sumBackgroundFrequency;
+        }
+
+        double totalProbabilitySpace = 0;
+        for (int i = 0; i < AminoAcid.values().length; i++) {
+            totalProbabilitySpace += RELATIVE_MUTABILITIES[i] * normalizedProbabilityMatrix[i];
+        }
+        double[] scaled_mutation_probability = new double[AminoAcid.values().length];
+        for (int i = 0; i < AminoAcid.values().length; i++) {
+            scaled_mutation_probability[i] = RELATIVE_MUTABILITIES[i] / (totalProbabilitySpace * 100);
+        }
+        double[] scale_factor = new double[AminoAcid.values().length];
+        for (int i = 0; i < AminoAcid.values().length; i++) {
+            scale_factor[i] = scaled_mutation_probability[i]/colSum[i];
+        }
+        for (int j = 0; j < AminoAcid.values().length; j++) {
+            for (int i = 0; i < AminoAcid.values().length; i++) {
+                probabilityMatrix[i][j] = scale_factor[j] * POINT_ACCEPTED_MUTATION_MATRIX[i][j] * 10000;
+            }
+        }
+        for (int i = 0; i < AminoAcid.values().length; i++) {
+            probabilityMatrix[i][i] = 1 - scaled_mutation_probability[i];
+        }
+        return probabilityMatrix;
     }
+
+    public static final double[][] MUTATION_PROBABILITY_MATRIX = calculateMutationProbabilityMatrix();
 
     public ProteinSimilarityMatrix(int[][] similarityMatrix) {
         assert similarityMatrix.length == similarityMatrix[0].length : "check your similarityMatrix, it must be a square matrix";
