@@ -3,8 +3,8 @@ package alignment;
 public class MatrixOperation {
 
     /**
-     * @param matrix1
-     * @param matrix2
+     * @param matrix1 20 * 20
+     * @param matrix2 20 * 20
      * @return matrix1 * matrix2
      */
     public static double[][] multiple(double[][] matrix1, double[][] matrix2){

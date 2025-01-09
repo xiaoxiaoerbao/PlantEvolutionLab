@@ -24,7 +24,7 @@ public class ProteinSimilarityMatrix implements SimilarityMatrix {
         return similarityMatrix[index1][index2];
     }
 
-    public static final int[][] calculatePAM_n_score_matrix(int n){
+    public static int[][] calculatePAM_n_score_matrix(int n){
         double[][] pam_n_mutation_probability_matrix = DefaultSimilarityMatrix.calculate_PAM_N_MUTATION_PROBABILITY_MATRIX(n);
         return DefaultSimilarityMatrix.calculate_PAM_log_odds_MUTATION_PROBABILITY_MATRIX(pam_n_mutation_probability_matrix);
     }
