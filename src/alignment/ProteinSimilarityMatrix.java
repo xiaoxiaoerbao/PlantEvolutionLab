@@ -1,9 +1,9 @@
 package alignment;
 
 
-import java.util.Collections;
-
 public class ProteinSimilarityMatrix implements SimilarityMatrix {
+
+    private static final int SIZE = 20; // Fixed size for the amino acids
 
     /**
      * 20 * 20
@@ -43,57 +43,114 @@ public class ProteinSimilarityMatrix implements SimilarityMatrix {
      */
     private static final int[] RELATIVE_MUTABILITIES = {100, 65, 134, 106, 20, 93, 102, 49, 66, 96, 40, 56, 94, 41, 56, 120, 97, 18, 41, 74};
 
-    public static double[][] calculateMutationProbabilityMatrix(){
-        double[][] probabilityMatrix = new double[AminoAcid.values().length][AminoAcid.values().length];
-        // j means the column, i means the row
-        int[] colSum = new int[AminoAcid.values().length];
-        for (int j = 0; j < AminoAcid.values().length; j++) {
-            for (int i = 0; i < AminoAcid.values().length; i++) {
+    private static int[] sumCol(){
+        int[] colSum = new int[SIZE];
+        for (int j = 0; j < SIZE; j++) {
+            for (int i = 0; i < SIZE; i++) {
                 colSum[j]=colSum[j]+POINT_ACCEPTED_MUTATION_MATRIX[i][j];
             }
         }
+        return colSum;
+    }
 
-        double[] background_frequencies = new double[AminoAcid.values().length];
-        for (int i = 0; i < AminoAcid.values().length; i++) {
+    private static double[] normalized_background_frequencies(){
+        int[] colSum = ProteinSimilarityMatrix.sumCol();
+        double[] background_frequencies = new double[SIZE];
+        for (int i = 0; i < SIZE; i++) {
             background_frequencies[i] = (colSum[i])/RELATIVE_MUTABILITIES[i];
         }
         double sumBackgroundFrequency = 0;
-        for (int i = 0; i < AminoAcid.values().length; i++) {
-            sumBackgroundFrequency = sumBackgroundFrequency + background_frequencies[i];
+        for (int i = 0; i < SIZE; i++) {
+            sumBackgroundFrequency += background_frequencies[i];
         }
-        double[] normalizedProbabilityMatrix = new double[AminoAcid.values().length];
-        for (int i = 0; i < AminoAcid.values().length; i++) {
-            normalizedProbabilityMatrix[i] = background_frequencies[i]/sumBackgroundFrequency;
+        double[] normalized_background_frequencies = new double[SIZE];
+        for (int i = 0; i < SIZE; i++) {
+            normalized_background_frequencies[i] = background_frequencies[i]/sumBackgroundFrequency;
         }
+        return normalized_background_frequencies;
+    }
+
+    /**
+     * mutation probability matrix is not symmetric
+     * @return mutation probability matrix
+     */
+    private static double[][] calculateMutationProbabilityMatrix(){
+        double[][] probabilityMatrix = new double[SIZE][SIZE];
+        // j means the column, i means the row
+        // Calculate column sums for normalization
+        int[] colSum = ProteinSimilarityMatrix.sumCol();
+
+        double[] normalized_background_frequencies = ProteinSimilarityMatrix.normalized_background_frequencies();
 
         double totalProbabilitySpace = 0;
-        for (int i = 0; i < AminoAcid.values().length; i++) {
-            totalProbabilitySpace += RELATIVE_MUTABILITIES[i] * normalizedProbabilityMatrix[i];
+        for (int i = 0; i < SIZE; i++) {
+            totalProbabilitySpace += RELATIVE_MUTABILITIES[i] * normalized_background_frequencies[i];
         }
-        double[] scaled_mutation_probability = new double[AminoAcid.values().length];
-        for (int i = 0; i < AminoAcid.values().length; i++) {
+        double[] scaled_mutation_probability = new double[SIZE];
+        for (int i = 0; i < SIZE; i++) {
             scaled_mutation_probability[i] = RELATIVE_MUTABILITIES[i] / (totalProbabilitySpace * 100);
         }
-        double[] scale_factor = new double[AminoAcid.values().length];
-        for (int i = 0; i < AminoAcid.values().length; i++) {
+        double[] scale_factor = new double[SIZE];
+        for (int i = 0; i < SIZE; i++) {
             scale_factor[i] = scaled_mutation_probability[i]/colSum[i];
         }
-        for (int j = 0; j < AminoAcid.values().length; j++) {
-            for (int i = 0; i < AminoAcid.values().length; i++) {
-                probabilityMatrix[i][j] = scale_factor[j] * POINT_ACCEPTED_MUTATION_MATRIX[i][j] * 10000;
+        for (int j = 0; j < SIZE; j++) {
+            for (int i = 0; i < SIZE; i++) {
+                probabilityMatrix[i][j] = scale_factor[j] * POINT_ACCEPTED_MUTATION_MATRIX[i][j];
             }
         }
-        for (int i = 0; i < AminoAcid.values().length; i++) {
-            probabilityMatrix[i][i] = 1 - scaled_mutation_probability[i];
+        for (int i = 0; i < SIZE; i++) {
+            probabilityMatrix[i][i] = (1 - scaled_mutation_probability[i]);
         }
         return probabilityMatrix;
     }
 
-    public static final double[][] MUTATION_PROBABILITY_MATRIX = calculateMutationProbabilityMatrix();
+    public static final double[][] PAM1_MUTATION_PROBABILITY_MATRIX = calculateMutationProbabilityMatrix();
+
+    public static final double[][] PAM2_MUTATION_PROBABILITY_MATRIX(){
+        return MatrixOperation.multiple(PAM1_MUTATION_PROBABILITY_MATRIX,
+                PAM1_MUTATION_PROBABILITY_MATRIX);
+    }
+
+    public static final double[][] PAM250_MUTATION_PROBABILITY_MATRIX(){
+        double[][] probabilityMatrix = PAM1_MUTATION_PROBABILITY_MATRIX;
+        for (int i = 1; i < 250; i++) {
+            probabilityMatrix = MatrixOperation.multiple(PAM1_MUTATION_PROBABILITY_MATRIX, probabilityMatrix);
+        }
+        return probabilityMatrix;
+    }
+
+    /**
+     * log odds matrix
+     * @param pam_mutation_probability_matrix pam mutation probability matrix, pam1 or pam2 or pam250 or pam with any length
+     * @return pam score matrix
+     */
+    public static final double[][] calculate_PAM_log_odds_MUTATION_PROBABILITY_MATRIX(double[][] pam_mutation_probability_matrix){
+        double[] normalized_background_frequencies = ProteinSimilarityMatrix.normalized_background_frequencies();
+        double[][] joint_probability_matrix = new double[SIZE][SIZE];
+        for (int j = 0; j < SIZE; j++) {
+            for (int i = 0; i < SIZE; i++) {
+                joint_probability_matrix[i][j] = pam_mutation_probability_matrix[i][j] * normalized_background_frequencies[j];
+            }
+        }
+        for (int i = 0; i < SIZE; i++) {
+            for (int j = 0; j < i; j++) {
+                joint_probability_matrix[i][j] = (joint_probability_matrix[i][j]+joint_probability_matrix[j][i])/2;
+                joint_probability_matrix[j][i] = joint_probability_matrix[i][j];
+            }
+        }
+        double[][] log_odds_MUTATION_PROBABILITY_MATRIX = new double[SIZE][SIZE];
+        for (int i = 0; i < SIZE; i++) {
+            for (int j = 0; j < SIZE; j++) {
+                log_odds_MUTATION_PROBABILITY_MATRIX[i][j] = Math.round(Math.log(joint_probability_matrix[i][j]/(normalized_background_frequencies[i]*normalized_background_frequencies[j])));
+            }
+        }
+        return log_odds_MUTATION_PROBABILITY_MATRIX;
+    }
 
     public ProteinSimilarityMatrix(int[][] similarityMatrix) {
         assert similarityMatrix.length == similarityMatrix[0].length : "check your similarityMatrix, it must be a square matrix";
-        assert similarityMatrix.length == 20 : "protein similarityMatrix length must be 20";
+        assert similarityMatrix.length == SIZE : "protein similarityMatrix length must be 20";
         this.similarityMatrix = similarityMatrix;
     }
 
