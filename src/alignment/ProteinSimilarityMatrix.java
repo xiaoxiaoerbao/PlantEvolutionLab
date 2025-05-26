@@ -1,6 +1,10 @@
 package alignment;
 
 
+/**
+ * PAM score matrix and BLOSUM score matrix
+ * https://www.ncbi.nlm.nih.gov/IEB/ToolBox/C_DOC/lxr/source/data/
+ */
 public class ProteinSimilarityMatrix implements SimilarityMatrix {
 
     private static final int AMINO_ACID_COUNT = 20; // Fixed size for the amino acids
@@ -35,6 +39,9 @@ public class ProteinSimilarityMatrix implements SimilarityMatrix {
 
     public static final int[][] PAM_250_SCORE_MATRIX = calculatePAM_n_score_matrix(250);
 
+    /**
+     * https://bioinformaticshome.com/bioinformatics_tutorials/sequence_alignment/substitution_matrices_page2.html
+     */
     private static final class DefaultSimilarityMatrix {
 
         /**
