@@ -72,8 +72,16 @@ public class Fasta {
         return new Fasta(headers, sequences);
     }
 
+    /**
+     * rename header with new header array
+     * @param newHeader new header array
+     */
     public void renameHeader(String[] newHeader) {
-        this.headers = newHeader;
+        String[] headers = new String[this.headers.length];
+        for (int i = 0; i < newHeader.length; i++) {
+            headers[i] = ">" + newHeader[i];
+        }
+        this.headers = headers;
     }
 
     public String getHeader(int index){
@@ -144,5 +152,12 @@ public class Fasta {
         }
     }
 
+    /**
+     * write fasta file with line length 60
+     * @param fastaFile fasta file path
+     */
+    public void writeFasta(String fastaFile) {
+        this.writeFasta(fastaFile, 60);
+    }
 
 }
