@@ -3,6 +3,7 @@ package fa;
 import utils.IOTool;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
+import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.EnumSet;
@@ -56,7 +57,7 @@ public class Fasta {
                         seq = sb.toString().getBytes();
                         sequenceList.add(seq);
                     }
-                    headerList.add(line);
+                    headerList.add(line.substring(1));
                     sb.setLength(0);
                 }else {
                     sb.append(line.toUpperCase());
@@ -72,16 +73,8 @@ public class Fasta {
         return new Fasta(headers, sequences);
     }
 
-    /**
-     * rename header with new header array
-     * @param newHeader new header array
-     */
     public void renameHeader(String[] newHeader) {
-        String[] headers = new String[this.headers.length];
-        for (int i = 0; i < newHeader.length; i++) {
-            headers[i] = ">" + newHeader[i];
-        }
-        this.headers = headers;
+        this.headers = newHeader;
     }
 
     public String getHeader(int index){
@@ -136,7 +129,7 @@ public class Fasta {
             StringBuilder sb = new StringBuilder();
             for (int i = 0; i < sequences.length; i++) {
                 sb.setLength(0);
-                sb.append(headers[i]).append("\n");
+                sb.append(">").append(headers[i]).append("\n");
                 for (int j = 0; j < sequences[i].length; j++) {
                     if (j > 0 && j % lineLength == 0){
                         sb.append("\n").append((char)sequences[i][j]);
@@ -153,11 +146,39 @@ public class Fasta {
     }
 
     /**
-     * write fasta file with line length 60
-     * @param fastaFile fasta file path
+     *
+     * @param fastaFileOutDir
+     * @param lineLength 80 or 60
      */
-    public void writeFasta(String fastaFile) {
-        this.writeFasta(fastaFile, 60);
+    public void writeFastaByChr(String fastaFileOutDir, int lineLength) {
+        int fastaLineLength = this.headers.length;
+        byte[][] sequences = this.getSequences();
+        String[] headers = this.getHeaders();
+        StringBuilder sb = new StringBuilder();
+        BufferedWriter bw;
+        File outputFile;
+        try {
+            for (int i = 0; i < sequences.length; i++) {
+                outputFile = new File(fastaFileOutDir, headers[i]+".fasta");
+                bw = IOTool.getBufferedWriter(outputFile);
+                sb.setLength(0);
+                sb.append(">").append(headers[i]).append("\n");
+                for (int j = 0; j < sequences[i].length; j++) {
+                    if (j > 0 && j % lineLength == 0){
+                        sb.append("\n").append((char)sequences[i][j]);
+                    }else {
+                        sb.append((char) sequences[i][j]);
+                    }
+                }
+                bw.write(sb.toString());
+                bw.newLine();
+                bw.flush();
+                bw.close();
+            }
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
+
 
 }
