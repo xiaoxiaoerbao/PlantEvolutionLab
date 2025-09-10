@@ -58,7 +58,7 @@ public class Fasta {
             seqs.add(this.sequences[i]);
         }
         this.sequences = seqs.toArray(new byte[seqs.size()][]);
-        this.headers = headers.toArray(new String[headers.size()]);
+        this.headers = headers.toArray(new String[0]);
     }
 
     public static Fasta buildFastaFrom(String fastaFile) {
@@ -164,7 +164,7 @@ public class Fasta {
 
     /**
      *
-     * @param fastaFileOutDir
+     * @param fastaFileOutDir output directory
      * @param lineLength 80 or 60
      */
     public void writeFastaByChr(String fastaFileOutDir, int lineLength) {
@@ -229,7 +229,7 @@ public class Fasta {
 
     /**
      * lineLength 80
-     * @param fastaFileOutDir
+     * @param fastaFileOutDir output directory
      */
     public void writeFastaByChr(String fastaFileOutDir) {
         this.writeFastaByChr(fastaFileOutDir, 80);
