@@ -44,6 +44,23 @@ public class Fasta {
         return this.headers.length;
     }
 
+    /**
+     * header 为 -1 的记录会被移除
+     */
+    public void removeUnwantedChromosomes(){
+        List<byte[]> seqs = new ArrayList<>();
+        List<String> headers = new ArrayList<>();
+        for (int i = 0; i < this.headers.length; i++) {
+            if (this.headers[i].equals("-1")) {
+                continue;
+            }
+            headers.add(this.headers[i]);
+            seqs.add(this.sequences[i]);
+        }
+        this.sequences = seqs.toArray(new byte[seqs.size()][]);
+        this.headers = headers.toArray(new String[headers.size()]);
+    }
+
     public static Fasta buildFastaFrom(String fastaFile) {
         List<String> headerList = new ArrayList<>();
         List<byte[]> sequenceList = new ArrayList<>();
@@ -178,6 +195,44 @@ public class Fasta {
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
+    }
+
+    public void writeGZippedFastaByChr(String fastaFileOutDir, int lineLength) {
+        int fastaLineLength = this.headers.length;
+        byte[][] sequences = this.getSequences();
+        String[] headers = this.getHeaders();
+        StringBuilder sb = new StringBuilder();
+        BufferedWriter bw;
+        File outputFile;
+        try {
+            for (int i = 0; i < sequences.length; i++) {
+                outputFile = new File(fastaFileOutDir, headers[i]+".fasta.gz");
+                bw = IOTool.getBufferedWriter(outputFile);
+                sb.setLength(0);
+                sb.append(">").append(headers[i]).append("\n");
+                for (int j = 0; j < sequences[i].length; j++) {
+                    if (j > 0 && j % lineLength == 0){
+                        sb.append("\n").append((char)sequences[i][j]);
+                    }else {
+                        sb.append((char) sequences[i][j]);
+                    }
+                }
+                bw.write(sb.toString());
+                bw.newLine();
+                bw.flush();
+                bw.close();
+            }
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    /**
+     * lineLength 80
+     * @param fastaFileOutDir
+     */
+    public void writeFastaByChr(String fastaFileOutDir) {
+        this.writeFastaByChr(fastaFileOutDir, 80);
     }
 
 
