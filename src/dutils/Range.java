@@ -1,4 +1,4 @@
-package maf;
+package dutils;
 
 import java.util.Objects;
 
