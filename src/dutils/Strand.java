@@ -16,9 +16,9 @@ import java.util.stream.Collectors;
 public enum Strand {
 
     /** Forward strand represented by "+" */
-    FORWARD("+"),
+    PLUS("+"),
     /** Reverse strand represented by "-" */
-    REVERSE("-");
+    MINUS("-");
 
     /** String representation of the strand */
     final String str;
