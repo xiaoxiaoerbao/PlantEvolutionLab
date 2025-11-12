@@ -28,8 +28,8 @@ public class MAF {
         List<String> linesPerAlignment= new ArrayList<>();
         String line;
         try (BufferedReader br = IOTool.getBufferedReader(mafFile)) {
-            while ((line=br.readLine()).startsWith("#")){}
-            while ((line=br.readLine())!=null){
+            while ((line = br.readLine()) != null && line.startsWith("#")) {}
+            while (line!=null){
                 if (StringUtils.isBlank(line)){
                     mafBlock = new MAFBlock(linesPerAlignment);
                     mafBlockList.add(mafBlock);
@@ -37,6 +37,7 @@ public class MAF {
                 }else {
                     linesPerAlignment.add(line);
                 }
+                line = br.readLine();
             }
         } catch (IOException e) {
             e.printStackTrace();
@@ -48,7 +49,7 @@ public class MAF {
      * Call ancestral alleles at aligned genomic positions for specified species.
      * Only positions without gaps across species will be output.
      * @param speciesList  Ordered list of species to extract
-     * @param outputFile   Output TSV file
+     * @param outputFile   Output TSV file, in which pos is 1-based
      */
     public void callAncestralAllele(List<Species> speciesList, String outputFile){
         Set<Species> speciesSet = new HashSet<>(speciesList);
