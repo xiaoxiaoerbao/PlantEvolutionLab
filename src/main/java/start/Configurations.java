@@ -13,6 +13,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -31,10 +32,12 @@ public class Configurations {
     int[] lambda;
     int[] rho;
     Range[][] ranges;
+    Range[][] coreRanges;
+    Range[][] gapRanges;
 
     /**
      * Reads a TSV header beginning with config_id/type and at least eight columns.
-     * Extra columns (such as rho/lambda) are ignored. NA in beta/delta is stored as -1.0.
+     * Extra columns (such as rho/lambda ratio) are ignored. NA in beta/delta is stored as -1.0.
      * Blank lines and # comments are skipped; failed reads preserve existing data.
      */
     public void buildFromParameterFile(File parameterFile) {
@@ -102,6 +105,8 @@ public class Configurations {
         this.lambda = lambdaList.toIntArray();
         this.rho = rhoList.toIntArray();
         this.ranges = new Range[configIDList.size()][];
+        this.coreRanges = new Range[configIDList.size()][];
+        this.gapRanges = new Range[configIDList.size()][];
         System.out.println("Built " + configIDList.size() + " configurations from " + parameterFile.getAbsolutePath());
     }
 
@@ -121,8 +126,10 @@ public class Configurations {
     }
 
     /**
-     * Reads regionsDir/config_id/final.bed in parallel across configurations.
-     * ranges[i] corresponds to config_id[i] and preserves the BED record order.
+     * Reads final.bed, core.bed and gap.bed from regionsDir/config_id in parallel.
+     * All three arrays correspond to config_id and preserve the BED record order.
+     * Core and gap intervals must partition the final intervals without overlap.
+     * Empty gap files are valid. Failed reads preserve all existing region arrays.
      * BED coordinates are 0-based and half-open; only the first three columns are used.
      * Blank lines, # comments, track lines and browser lines are skipped.
      */
@@ -130,25 +137,70 @@ public class Configurations {
         if (this.config_id == null) {
             throw new IllegalStateException("Build configurations before adding regions");
         }
-        File[] regionFiles = new File[this.config_id.length];
-        File subdir;
-        for (int i = 0; i < this.config_id.length; i++) {
-            subdir = new File(regionsDir, this.config_id[i]);
-            regionFiles[i] = new File(subdir, "final.bed");
-        }
-        int threads = Math.min(32, regionFiles.length); // 设置目标并行度
+        int threads = Math.min(32, this.config_id.length); // 设置目标并行度
 
         try (ForkJoinPool pool = new ForkJoinPool(threads)) {
-            this.ranges = pool.submit(() ->
-                    IntStream.range(0, regionFiles.length)
+            RegionSet[] loaded = pool.submit(() ->
+                    IntStream.range(0, this.config_id.length)
                             .parallel()
-                            .mapToObj(i -> readRegions(regionFiles[i]))
-                            .toArray(Range[][]::new)
+                            .mapToObj(i -> readRegionSet(new File(regionsDir, this.config_id[i])))
+                            .toArray(RegionSet[]::new)
             ).join();
+            Range[][] newRanges = new Range[loaded.length][];
+            Range[][] newCoreRanges = new Range[loaded.length][];
+            Range[][] newGapRanges = new Range[loaded.length][];
+            for (int i = 0; i < loaded.length; i++) {
+                newRanges[i] = loaded[i].regions();
+                newCoreRanges[i] = loaded[i].cores();
+                newGapRanges[i] = loaded[i].gaps();
+            }
+            this.ranges = newRanges;
+            this.coreRanges = newCoreRanges;
+            this.gapRanges = newGapRanges;
         }
     }
 
-    private static Range[] readRegions(File regionFile) {
+    record RegionSet(Range[] regions, Range[] cores, Range[] gaps) {}
+
+    // The statistics path reads one configuration at a time, without populating Range[][].
+    static RegionSet readRegionSet(File directory) {
+        Range[] regions = readRegions(new File(directory, "final.bed"));
+        Range[] cores = readRegions(new File(directory, "core.bed"));
+        Range[] gaps = readRegions(new File(directory, "gap.bed"));
+        validatePartition(directory, regions, cores, gaps);
+        return new RegionSet(regions, cores, gaps);
+    }
+
+    /** Validates on sorted copies, retaining original BED order in the stored arrays. */
+    private static void validatePartition(File directory, Range[] regions, Range[] cores, Range[] gaps) {
+        Range[] sortedRegions = regions.clone();
+        Arrays.sort(sortedRegions);
+        Range[] parts = new Range[cores.length + gaps.length];
+        System.arraycopy(cores, 0, parts, 0, cores.length);
+        System.arraycopy(gaps, 0, parts, cores.length, gaps.length);
+        Arrays.sort(parts);
+        int index = 0;
+        Range previous = null;
+        for (Range region : sortedRegions) {
+            if (previous != null && previous.overlaps(region)) {
+                throw new IllegalArgumentException(directory + ": overlapping final.bed intervals: " + previous + ", " + region);
+            }
+            int cursor = region.start();
+            while (cursor < region.end()) {
+                if (index >= parts.length || !parts[index].chr().equals(region.chr())
+                        || parts[index].start() != cursor || parts[index].end() > region.end()) {
+                    throw new IllegalArgumentException(directory + ": core.bed and gap.bed must partition final.bed exactly near " + region);
+                }
+                cursor = parts[index++].end();
+            }
+            previous = region;
+        }
+        if (index != parts.length) {
+            throw new IllegalArgumentException(directory + ": core.bed or gap.bed contains intervals outside final.bed");
+        }
+    }
+
+    static Range[] readRegions(File regionFile) {
         List<Range> regionList = new ArrayList<>();
         long lineNumber = 0;
         try (BufferedReader br = IOTool.getBufferedReader(regionFile)) {
