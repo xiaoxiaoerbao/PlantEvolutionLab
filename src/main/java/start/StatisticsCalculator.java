@@ -26,16 +26,10 @@ import java.util.Map;
  * Neither all configurations' ranges nor full depth records are retained.
  */
 public final class StatisticsCalculator {
-    public static final double DEFAULT_BASELINE_XP56 = 19.20; // CARMEN
-    public static final double DEFAULT_BASELINE_XP57 = 19.93; // SN055525
     private final double baseline56;
     private final double baseline57;
     private final int sortChunkInts;
     private final int cacheMiB;
-
-    public StatisticsCalculator() {
-        this(DEFAULT_BASELINE_XP56, DEFAULT_BASELINE_XP57);
-    }
 
     public StatisticsCalculator(double baseline56, double baseline57) {
         this(baseline56, baseline57, Integer.getInteger("statistics.sortChunkInts", 1_048_576),
@@ -63,13 +57,18 @@ public final class StatisticsCalculator {
      * Existing results remain untouched until calculation completes. Temporary prefix/sort files
      * are deleted on success or failure.
      * Only parameters need to be loaded in configs; addRegions() is deliberately unnecessary.
+     * Relative output paths are resolved against the working directory; missing parents are created.
      */
     public Output calculateAndWrite(Configurations configs, File regionsDir, File q20File, File q0File,
                                     Path outputDirectory) throws IOException {
         if (configs.config_id == null || configs.genomeType == null) {
             throw new IllegalStateException("Build configurations before calculating statistics");
         }
-        Path tempDirectory = Files.createTempDirectory(outputDirectory.getParent(), ".statistics-");
+        outputDirectory = outputDirectory.toAbsolutePath().normalize();
+        Path outputParent = outputDirectory.getParent();
+        if (outputParent == null) throw new IOException("Output directory must not be a filesystem root: " + outputDirectory);
+        Files.createDirectories(outputParent);
+        Path tempDirectory = Files.createTempDirectory(outputParent, ".statistics-");
         try {
             Path tempDirectory_work = Files.createDirectory(tempDirectory.resolve("work"));
             long rangeCount = 0;
