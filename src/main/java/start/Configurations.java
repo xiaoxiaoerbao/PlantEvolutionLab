@@ -203,32 +203,14 @@ public class Configurations {
 
     static Range[] readRegions(File regionFile) {
         List<Range> regionList = new ArrayList<>();
-        long lineNumber = 0;
         try (BufferedReader br = IOTool.getBufferedReader(regionFile)) {
             String line;
             while ((line = br.readLine()) != null) {
-                lineNumber++;
-                String leading = line.stripLeading();
-                if (leading.isEmpty() || leading.startsWith("#") || leading.equals("track")
-                        || leading.startsWith("track ") || leading.startsWith("track\t")
-                        || leading.equals("browser") || leading.startsWith("browser ") || leading.startsWith("browser\t")) continue;
-                try {
-                    String[] columns = line.indexOf('\t') >= 0
-                            ? StringUtils.splitPreserveAllTokens(line, '\t') : StringUtils.split(line);
-                    if (columns.length < 3) throw new IllegalArgumentException("Expected at least three BED columns");
-                    for (int i = 0; i < 3; i++) {
-                        columns[i] = columns[i].trim();
-                        if (columns[i].isEmpty()) throw new IllegalArgumentException("Empty BED field in column " + (i + 1));
-                    }
-                    regionList.add(new Range(columns[0], Integer.parseInt(columns[1]), Integer.parseInt(columns[2])));
-                } catch (IllegalArgumentException e) {
-                    throw new IllegalArgumentException(regionFile.getAbsolutePath() + ":" + lineNumber
-                            + ": " + e.getMessage(), e);
-                }
+                String[] columns = StringUtils.split(line);
+                regionList.add(new Range(columns[0], Integer.parseInt(columns[1]), Integer.parseInt(columns[2])));
             }
         } catch (IOException e) {
-            throw new UncheckedIOException("Failed to read regions from "
-                    + regionFile.getAbsolutePath(), e);
+            throw new RuntimeException(e);
         }
         return regionList.toArray(new Range[0]);
     }
