@@ -69,20 +69,15 @@ public final class StatisticsCalculator {
         if (configs.config_id == null || configs.genomeType == null) {
             throw new IllegalStateException("Build configurations before calculating statistics");
         }
-        Path output = outputDirectory.toAbsolutePath().normalize();
-        if (Files.exists(output, LinkOption.NOFOLLOW_LINKS) && !Files.isDirectory(output)) {
-            throw new FileAlreadyExistsException("Output path is not a directory: " + output);
-        }
-        Files.createDirectories(output.getParent());
-        Path stage = Files.createTempDirectory(output.getParent(), ".statistics-");
+        Path tempDirectory = Files.createTempDirectory(outputDirectory.getParent(), ".statistics-");
         try {
-            Path work = Files.createDirectory(stage.resolve("work"));
+            Path tempDirectory_work = Files.createDirectory(tempDirectory.resolve("work"));
             long rangeCount = 0;
             long q20Records, q0Records, indexedEndpoints;
             try (EndpointDepthIndex index = EndpointDepthIndex.build(configs, regionsDir, q20File, q0File,
-                    work, sortChunkInts, cacheMiB);
-                 BufferedWriter ranges = writer(stage.resolve("range_statistics.tsv"));
-                 BufferedWriter summaries = writer(stage.resolve("configuration_statistics.tsv"))) {
+                    tempDirectory_work, sortChunkInts, cacheMiB);
+                 BufferedWriter ranges = writer(tempDirectory.resolve("range_statistics.tsv"));
+                 BufferedWriter summaries = writer(tempDirectory.resolve("configuration_statistics.tsv"))) {
                 q20Records = index.q20Records();
                 q0Records = index.q0Records();
                 indexedEndpoints = index.endpointCount();
@@ -96,14 +91,14 @@ public final class StatisticsCalculator {
                     }
                 }
             }
-            Files.writeString(stage.resolve("README.txt"), metadata(q20File, q0File, regionsDir,
+            Files.writeString(tempDirectory.resolve("README.txt"), metadata(q20File, q0File, regionsDir,
                     configs.config_id.length, rangeCount, q20Records, q0Records, indexedEndpoints), StandardCharsets.UTF_8);
-            deleteTree(work);
-            Path published = publish(stage, output);
+            deleteTree(tempDirectory_work);
+            Path published = publish(tempDirectory, outputDirectory);
             return new Output(published.resolve("range_statistics.tsv"), published.resolve("configuration_statistics.tsv"),
                     published.resolve("README.txt"), configs.config_id.length, rangeCount, q20Records, q0Records, indexedEndpoints);
         } catch (IOException | RuntimeException | Error failure) {
-            try { deleteTree(stage); } catch (IOException cleanup) { failure.addSuppressed(cleanup); }
+            try { deleteTree(tempDirectory); } catch (IOException cleanup) { failure.addSuppressed(cleanup); }
             throw failure;
         }
     }
