@@ -11,15 +11,13 @@ import java.nio.file.Files;
 import java.nio.file.LinkOption;
 import java.nio.file.Path;
 import java.nio.file.SimpleFileVisitor;
+import java.nio.file.StandardCopyOption;
 import java.nio.file.attribute.BasicFileAttributes;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 
 /**
  * Evaluates candidate regions against independent Q20/Q0 depth files.
@@ -61,9 +59,9 @@ public final class StatisticsCalculator {
                          long configurationCount, long rangeCount, long q20Records, long q0Records, long indexedEndpoints) {}
 
     /**
-     * Publishes completed files into a new or existing directory. If any result filename
-     * is already present, publishes a unique run subdirectory instead of overwriting it.
-     * Existing files are preserved. Temporary prefix/sort files are deleted on success or failure.
+     * Publishes completed files directly into the requested directory, replacing same-name results.
+     * Existing results remain untouched until calculation completes. Temporary prefix/sort files
+     * are deleted on success or failure.
      * Only parameters need to be loaded in configs; addRegions() is deliberately unnecessary.
      */
     public Output calculateAndWrite(Configurations configs, File regionsDir, File q20File, File q0File,
@@ -110,7 +108,7 @@ public final class StatisticsCalculator {
         }
     }
 
-    /** Moves only this run's files; an existing empty directory need not be deleted/replaced. */
+    /** Replaces only the three result files, retaining backups until publication completes. */
     static Path publish(Path stage, Path output) throws IOException {
         if (!Files.exists(output, LinkOption.NOFOLLOW_LINKS)) {
             try {
@@ -123,36 +121,48 @@ public final class StatisticsCalculator {
         if (!Files.isDirectory(output)) throw new FileAlreadyExistsException("Output path is not a directory: " + output);
         List<String> filenames = List.of("range_statistics.tsv", "configuration_statistics.tsv", "README.txt");
         for (String filename : filenames) {
-            if (Files.exists(output.resolve(filename), LinkOption.NOFOLLOW_LINKS)) return publishNewRun(stage, output);
+            if (!Files.isRegularFile(stage.resolve(filename), LinkOption.NOFOLLOW_LINKS)) {
+                throw new IOException("Missing or invalid staged result: " + stage.resolve(filename));
+            }
+            if (Files.isDirectory(output.resolve(filename), LinkOption.NOFOLLOW_LINKS)) {
+                throw new FileAlreadyExistsException("Result path is a directory: " + output.resolve(filename));
+            }
         }
+        Path backup = Files.createTempDirectory(stage.getParent(), ".statistics-backup-");
         List<String> moved = new ArrayList<>();
+        boolean rollbackFailed = false;
         try {
             for (String filename : filenames) {
-                Files.move(stage.resolve(filename), output.resolve(filename));
+                Path existing = output.resolve(filename);
+                if (Files.exists(existing, LinkOption.NOFOLLOW_LINKS)) {
+                    Files.copy(existing, backup.resolve(filename), LinkOption.NOFOLLOW_LINKS);
+                }
+            }
+            for (String filename : filenames) {
+                Files.move(stage.resolve(filename), output.resolve(filename), StandardCopyOption.REPLACE_EXISTING);
                 moved.add(filename);
             }
             Files.delete(stage);
             return output;
         } catch (IOException failure) {
-            // Restore partial moves on failure; never remove any pre-existing output files.
+            // Restore staged results and the previous output files after partial publication.
             for (int i = moved.size() - 1; i >= 0; i--) {
                 String filename = moved.get(i);
-                try { Files.move(output.resolve(filename), stage.resolve(filename)); }
-                catch (IOException rollback) { failure.addSuppressed(rollback); }
+                try {
+                    Files.move(output.resolve(filename), stage.resolve(filename), StandardCopyOption.REPLACE_EXISTING);
+                    if (Files.exists(backup.resolve(filename), LinkOption.NOFOLLOW_LINKS)) {
+                        Files.copy(backup.resolve(filename), output.resolve(filename), LinkOption.NOFOLLOW_LINKS);
+                    }
+                } catch (IOException rollback) {
+                    rollbackFailed = true;
+                    failure.addSuppressed(rollback);
+                }
             }
-            if (failure instanceof FileAlreadyExistsException && failure.getSuppressed().length == 0) {
-                return publishNewRun(stage, output);
-            }
+            if (rollbackFailed) failure.addSuppressed(new IOException("Previous results retained in: " + backup));
             throw failure;
+        } finally {
+            if (!rollbackFailed) deleteTree(backup);
         }
-    }
-
-    private static Path publishNewRun(Path stage, Path output) throws IOException {
-        String stamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd-HHmmss"));
-        Path run = output.resolve("run-" + stamp + "-" + UUID.randomUUID());
-        Files.move(stage, run);
-        System.out.println("Existing result files preserved; writing this run to: " + run);
-        return run;
     }
 
     private long evaluateConfiguration(Configurations configs, int i, File regionsDir, EndpointDepthIndex index,
