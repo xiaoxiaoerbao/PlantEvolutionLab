@@ -64,7 +64,7 @@ final class EndpointDepthIndex implements AutoCloseable {
                 for (Range range : ranges) {
                     if (!allowed.contains(range.chr())) {
                         throw new IllegalArgumentException(configs.config_id[i] + ": chromosome " + range.chr()
-                                + " does not belong to configuration type " + type.getShortName());
+                                + " does not belong to configuration genomeType " + type.getShortName());
                     }
                     Entry entry = entries.get(range.chr());
                     if (entry == null) {
