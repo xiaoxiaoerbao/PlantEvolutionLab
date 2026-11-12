@@ -21,7 +21,7 @@ public enum GenomeType {
     }
 
     /**
-     * Returns the genome type with the given short name (case-sensitive).
+     * Returns the genome genomeType with the given short name (case-sensitive).
      *
      * @throws IllegalArgumentException if shortName is null or unknown
      */
