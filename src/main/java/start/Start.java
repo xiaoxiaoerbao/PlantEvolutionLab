@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.file.Path;
+import java.util.Locale;
 
 public class Start {
 
@@ -17,7 +18,7 @@ public class Start {
         String regionsDir = args.length == 0 ? "/Users/xudaxing/Desktop/temp/regions" : args[3];
         Path outputDir = Path.of(args.length >= 5 ? args[4] : "/Users/xudaxing/Desktop/temp/output");
         Path baselineFile = Path.of(args.length == 6 ? args[5] : "/Users/xudaxing/Desktop/temp/baseline.json");
-
+        long startNanos = System.nanoTime();
         try {
             NormalizationBaselines baselines = NormalizationBaselines.read(baselineFile);
             System.out.println("Normalization baselines from " + baselineFile.toAbsolutePath()
@@ -31,6 +32,9 @@ public class Start {
             System.out.println("Completed: configurations=" + output.configurationCount() + ", ranges=" + output.rangeCount());
         } catch (IOException e) {
             throw new UncheckedIOException("Statistics calculation failed: " + e.getMessage(), e);
+        } finally {
+            double elapsedSeconds = (System.nanoTime() - startNanos) / 1_000_000_000.0;
+            System.out.printf(Locale.ROOT, "Total runtime for range and configuration statistics: %.3f seconds%n", elapsedSeconds);
         }
     }
 }
