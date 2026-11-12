@@ -36,7 +36,7 @@ public class Configurations {
     Range[][] gapRanges;
 
     /**
-     * Reads a TSV header beginning with config_id/type and at least eight columns.
+     * Reads a TSV header beginning with config_id and type (or genomeType), with at least eight columns.
      * Extra columns (such as rho/lambda ratio) are ignored. NA in beta/delta is stored as -1.0.
      * Blank lines and # comments are skipped; failed reads preserve existing data.
      */
@@ -62,8 +62,9 @@ public class Configurations {
                     String[] columns = StringUtils.splitPreserveAllTokens(line, '\t');
                     for (int i = 0; i < columns.length; i++) columns[i] = columns[i].trim();
                     if (columnCount == 0) {
-                        if (columns.length < 8 || !"config_id".equals(columns[0]) || !"type".equals(columns[1])) {
-                            throw new IllegalArgumentException("Expected a TSV header beginning with config_id/type and at least eight columns");
+                        if (columns.length < 8 || !"config_id".equals(columns[0])
+                                || !("type".equals(columns[1]) || "genomeType".equals(columns[1]))) {
+                            throw new IllegalArgumentException("Expected a TSV header beginning with config_id followed by type or genomeType, and at least eight columns");
                         }
                         columnCount = columns.length;
                         continue;
