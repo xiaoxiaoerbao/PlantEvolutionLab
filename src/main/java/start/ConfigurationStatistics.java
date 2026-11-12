@@ -7,18 +7,18 @@ import java.util.Arrays;
 
 /** Configuration-level results; undefined and inapplicable floating-point values are NaN (TSV: NA). */
 public record ConfigurationStatistics(
-        String configId, GenomeType type, int regionCount, long totalLength, long gapLength,
+        String configId, GenomeType genomeType, int regionCount, long totalLength, long gapLength,
         long y10, double c10, double a90, double t10, double u10,
         int invalidUCount, double invalidUFraction, double negativeB1, double gapFraction,
         int q20ExceedsQ0Count56, int q20ExceedsQ0Count57, int uAboveOneCount) {
-    public static final String HEADER = "config_id\ttype\talpha\tbeta\tdelta\tgamma\tlambda\trho"
+    public static final String HEADER = "config_id\tgenome_type\talpha\tbeta\tdelta\tgamma\tlambda\trho"
             + "\tn_regions\tL_total_bp\tL_gap_bp\tY10_joint_bp\tY10_positive_bp\tC10\tA90\tT10\tU10"
             + "\tn_invalid_U\tinvalid_U_fraction\tB1_negative\tG\tn_q20_gt_q0_xp56\tn_q20_gt_q0_xp57\tn_u_gt1\n";
 
     public void writeTsv(Writer out, Configurations input, int index) throws IOException {
-        boolean ab = type == GenomeType.AABB || type == GenomeType.AA;
+        boolean ab = genomeType == GenomeType.AABB || genomeType == GenomeType.AA;
         StringBuilder row = new StringBuilder(256);
-        row.append(configId).append('\t').append(type.getShortName()).append('\t').append(input.alpha[index]);
+        row.append(configId).append('\t').append(genomeType.getShortName()).append('\t').append(input.alpha[index]);
         RangeStatistics.append(row, input.beta[index] < 0 ? Double.NaN : input.beta[index],
                 input.delta[index] < 0 ? Double.NaN : input.delta[index]);
         row.append('\t').append(input.gamma[index]).append('\t').append(input.lambda[index]).append('\t').append(input.rho[index])
