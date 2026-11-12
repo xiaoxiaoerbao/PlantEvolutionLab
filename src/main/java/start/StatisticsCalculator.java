@@ -193,7 +193,7 @@ public final class StatisticsCalculator {
                 + "\nU is the exact depth-sum ratio, without clipping. q20_gt_q0 flags numerator > denominator for each parent."
                 + "\nu_gt1 / n_u_gt1 flag finite regional u > 1. Such values remain in U10; investigate Q20/Q0 input consistency."
                 + "\nU10 excludes invalid u values; invalid_U_fraction = invalid range count / all range count."
-                + "\nQuantiles are unweighted across ranges, type 7: h=(n-1)*p, linear interpolation."
+                + "\nQuantiles are unweighted across ranges, genomeType 7: h=(n-1)*p, linear interpolation."
                 + "\nC10, B1_negative and G are length-weighted ratios. B1_negative uses equivalent depth >= 1."
                 + "\nCore and gap intervals must partition final intervals exactly. G=sum(gap lengths)/sum(final lengths)."
                 + "\nNA means undefined or inapplicable. Empty configurations have zero counts/length/yield and NA ratios/quantiles."
